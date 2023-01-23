@@ -12,12 +12,16 @@ app.get('/', (req, res) => {
       }
 
       res.send(`Server ${process.pid} send response OK`)
+      cluster.worker.kill()
 })
 
 if (cluster.isMaster) {
       for (let i = 1; i <= numCPU; i++) {
             cluster.fork()
       }
+      cluster.on('exit', (worker, code, signal) => {
+            console.log(`worker ${worker.process.pid} died`)
+      })
 } else {
       app.listen(3000, () => console.log(`Server ${process.pid} started...`))
 }
